@@ -1,0 +1,44 @@
+{
+  "buckets": {},
+  "services": {
+    "abcc9efe-c91b-48e1-9782-14f8787a055b": {
+      "icon": "https://raw.githubusercontent.com/jellyfin/jellyfin-ux/master/branding/SVG/icon-transparent.svg",
+      "name": "Jellyfin",
+      "build": {
+        "dockerfilePath": "Dockerfile"
+      },
+      "deploy": {
+        "startCommand": null,
+        "healthcheckPath": "/health",
+        "restartPolicyType": "ON_FAILURE",
+        "restartPolicyMaxRetries": 10
+      },
+      "source": {
+        "repo": "https://github.com/two-workspaces/jellyfin-media",
+        "rootDirectory": "/"
+      },
+      "variables": {
+        "PORT": {
+          "defaultValue": "8080",
+          "description": "Port the service listens on - leave as is",
+          "isOptional": false
+        },
+        "JELLYFIN_ADMIN_PASSWORD": {
+          "defaultValue": "${{secret(24)}}",
+          "description": "Password for the 'admin' login in Jellyfin and at /upload, set on first boot only",
+          "isOptional": false
+        }
+      },
+      "networking": {
+        "serviceDomains": {
+          "<hasDomain>": {}
+        }
+      },
+      "volumeMounts": {
+        "abcc9efe-c91b-48e1-9782-14f8787a055b": {
+          "mountPath": "/data"
+        }
+      }
+    }
+  }
+}

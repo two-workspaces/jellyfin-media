@@ -1,0 +1,22 @@
+{
+	admin off
+	auto_https off
+	servers {
+		# Railway's edge connects from 100.64.0.0/10 and sets X-Real-IP to the client.
+		trusted_proxies static 100.64.0.0/10
+		client_ip_headers X-Real-IP
+	}
+}
+
+:{$PORT} {
+	handle /upload* {
+		reverse_proxy 127.0.0.1:8081
+	}
+	handle {
+		reverse_proxy 127.0.0.1:8096 {
+			# Only the client: Jellyfin treats loopback as the local network, and
+			# X-Forwarded-For from the edge ends in an edge hop.
+			header_up X-Forwarded-For {client_ip}
+		}
+	}
+}

@@ -1,0 +1,8 @@
+{
+  "name": "Jellyfin | Media Server with Browser Uploads, Plex Alternative",
+  "short_name": "Jellyfin Media",
+  "description": "Stream your movies, shows and music. Upload in the browser, no open wizard",
+  "category": "Other",
+  "image": "https://raw.githubusercontent.com/jellyfin/jellyfin-ux/master/branding/SVG/icon-transparent.svg",
+  "card_desc": "Jellyfin with File Browser built in, so you can upload media from the browser, and an admin account created before the site ever goes public."
+}
