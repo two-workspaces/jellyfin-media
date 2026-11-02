@@ -82,7 +82,7 @@ media_state() { find /data/media -type f -printf '%p %s\n' | sort | md5sum; }
       last=$now; changed=1
     elif [ -n "$changed" ]; then
       changed=
-      curl -fsS -X POST -H "X-Emby-Token: $(cat "$key_file")" http://127.0.0.1:8096/Library/Refresh ||
+      curl -fsS -X POST -H "Authorization: MediaBrowser Token=\"$(cat "$key_file")\"" http://127.0.0.1:8096/Library/Refresh ||
         echo "railway: library scan request failed"
     fi
   done
