@@ -25,6 +25,7 @@ trap 'kill $(jobs -p) 2>/dev/null; wait; exit 0' TERM INT
 /jellyfin/jellyfin &
 jellyfin_pid=$!
 
+key_file=/data/jellyfin/.railway-api-key
 auth='Authorization: MediaBrowser Client="Railway", Device="Railway", DeviceId="railway-setup", Version="1"'
 api() { curl -fsS -H 'Content-Type: application/json' -H "$auth" "http://127.0.0.1:8096$1" "${@:2}"; }
 
@@ -51,6 +52,9 @@ if ! api /System/Info/Public | grep -q '"StartupWizardCompleted":true'; then
     api "/Library/VirtualFolders?name=$name&collectionType=$type&refreshLibrary=false" \
       -d "{\"LibraryOptions\":{\"EnableRealtimeMonitor\":true,\"PathInfos\":[{\"Path\":\"/data/media/$dir\"}]}}"
   done
+  api "/Auth/Keys?app=Railway" -X POST
+  api /Auth/Keys | grep -o '"AccessToken":"[^"]*"' | head -1 | cut -d'"' -f4 > "$key_file"
+  chmod 600 "$key_file"
 fi
 
 # Basic auth, read from the variable on every boot. No symlink or archive permissions.
@@ -65,6 +69,24 @@ caddy_pid=$!
 # memory, and with no memory pressure it's never freed. Streaming a film would keep
 # showing as gigabytes, so drop it every 15 minutes.
 while sleep 900; do nice -n 19 drop-file-cache /data /cache /tmp; done &
+
+# Jellyfin only watches libraries that already held files when it started, so on a
+# fresh deploy uploads would wait for the 12-hour scan. Scan once a change has settled
+# for one poll, so a file still uploading isn't indexed half-written.
+media_state() { find /data/media -type f -printf '%p %s\n' | sort | md5sum; }
+(
+  last=$(media_state); changed=
+  while sleep 30; do
+    now=$(media_state)
+    if [ "$now" != "$last" ]; then
+      last=$now; changed=1
+    elif [ -n "$changed" ]; then
+      changed=
+      curl -fsS -X POST -H "X-Emby-Token: $(cat "$key_file")" http://127.0.0.1:8096/Library/Refresh ||
+        echo "railway: library scan request failed"
+    fi
+  done
+) &
 
 # Any of them exiting means the service is broken: exit so Railway restarts it.
 wait -n "$jellyfin_pid" "$dufs_pid" "$caddy_pid"
