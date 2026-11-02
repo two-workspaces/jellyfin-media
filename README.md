@@ -6,7 +6,7 @@
 
 ## About Hosting Jellyfin
 
-One service and one volume. Inside are Jellyfin, [File Browser](https://filebrowser.org/) at `/upload`, and Caddy in front of both.
+One service and one volume. Inside are Jellyfin, [dufs](https://github.com/sigoden/dufs) at `/upload`, and Caddy in front of both.
 
 - **Upload from the browser.** Jellyfin has no upload feature, and a Railway volume has no SFTP. Open `/upload`, drop files into `movies`, `shows` or `music`, and Jellyfin picks them up.
 - **No open setup wizard.** A fresh Jellyfin hands its wizard, and the admin account, to whoever opens the URL first. Here the wizard is finished before the public port opens, with the login `admin` and a generated password.
@@ -27,12 +27,12 @@ One service and one volume. Inside are Jellyfin, [File Browser](https://filebrow
 
 - [Jellyfin documentation](https://jellyfin.org/docs/)
 - [Jellyfin clients](https://jellyfin.org/downloads/clients/)
-- [File Browser documentation](https://filebrowser.org/)
+- [dufs documentation](https://github.com/sigoden/dufs)
 - [Template source on GitHub](https://github.com/two-workspaces/jellyfin-media)
 
 ### Implementation Details
 
-**Sign in** at your Railway domain with the username `admin` and the `JELLYFIN_ADMIN_PASSWORD` value from the service's Variables tab. The same login works at `/upload`. The variable is read on the first boot only: afterwards, change each password inside its own app.
+**Sign in** at your Railway domain with the username `admin` and the `JELLYFIN_ADMIN_PASSWORD` value from the service's Variables tab. The same login works at `/upload`. Jellyfin reads the variable on the first boot only, so change its password inside Jellyfin afterwards. `/upload` reads it on every boot, so change the variable to change that one.
 
 **Adding media.** Use one folder per film (`movies/Big Buck Bunny (2008)/Big Buck Bunny (2008).mp4`) and `shows/Name/Season 01/Name S01E01.mkv` for episodes, as [Jellyfin's naming guide](https://jellyfin.org/docs/general/server/media/movies/) describes.
 

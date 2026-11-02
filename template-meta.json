@@ -4,5 +4,6 @@
   "description": "Stream your movies, shows and music. Upload in the browser, no open wizard",
   "category": "Other",
   "image": "https://raw.githubusercontent.com/jellyfin/jellyfin-ux/master/branding/SVG/icon-transparent.svg",
-  "card_desc": "Jellyfin with File Browser built in, so you can upload media from the browser, and an admin account created before the site ever goes public."
+  "card_desc": "Jellyfin with a file uploader built in, so you can upload media from the browser, and an admin account created before the site ever goes public.",
+  "id": "3ac62b81-7783-4264-ac97-051165e504e8"
 }

@@ -1,11 +1,11 @@
 FROM caddy:2.11.7-alpine AS caddy
-FROM filebrowser/filebrowser:v2.63.23 AS filebrowser
+FROM sigoden/dufs:v0.47.0 AS dufs
 
 # Pinned: a moving tag (latest, 12) would rebase every deploy of this template at once.
 FROM jellyfin/jellyfin:12.4.20261026-211555
 
 COPY --from=caddy /usr/bin/caddy /usr/local/bin/caddy
-COPY --from=filebrowser /bin/filebrowser /usr/local/bin/filebrowser
+COPY --from=dufs /bin/dufs /usr/local/bin/dufs
 
 RUN apt-get update && apt-get install -y --no-install-recommends python3-minimal && rm -rf /var/lib/apt/lists/*
 

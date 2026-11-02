@@ -1,7 +1,7 @@
 #!/bin/bash
 # Railway entrypoint for Jellyfin: the setup wizard is completed on loopback before
-# the public port opens, File Browser adds the uploads Jellyfin doesn't have, and
-# Caddy serves both on $PORT.
+# the public port opens, dufs adds the uploads Jellyfin doesn't have, and Caddy serves
+# both on $PORT.
 set -euo pipefail
 
 : "${JELLYFIN_ADMIN_PASSWORD:?JELLYFIN_ADMIN_PASSWORD is not set}"
@@ -53,14 +53,10 @@ if ! api /System/Info/Public | grep -q '"StartupWizardCompleted":true'; then
   done
 fi
 
-db=/data/filebrowser.db
-if [ ! -e "$db" ]; then
-  filebrowser config init -d "$db" --root /data/media --baseurl /upload --address 127.0.0.1 --port 8081 \
-    --branding.name "Jellyfin uploads" --branding.disableExternal >/dev/null
-  filebrowser users add admin "$JELLYFIN_ADMIN_PASSWORD" --perm.admin -d "$db" >/dev/null
-fi
-filebrowser -d "$db" --disableExec &
-filebrowser_pid=$!
+# Basic auth, read from the variable on every boot. No symlink or archive permissions.
+dufs /data/media --bind 127.0.0.1 --port 8081 --path-prefix upload \
+  --allow-upload --allow-delete --allow-search --auth "admin:$JELLYFIN_ADMIN_PASSWORD@/:rw" &
+dufs_pid=$!
 
 caddy run --config /etc/caddy/Caddyfile --adapter caddyfile &
 caddy_pid=$!
@@ -71,5 +67,5 @@ caddy_pid=$!
 while sleep 900; do nice -n 19 drop-file-cache /data /cache /tmp; done &
 
 # Any of them exiting means the service is broken: exit so Railway restarts it.
-wait -n "$jellyfin_pid" "$filebrowser_pid" "$caddy_pid"
+wait -n "$jellyfin_pid" "$dufs_pid" "$caddy_pid"
 exit 1

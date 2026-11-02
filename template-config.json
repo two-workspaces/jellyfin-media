@@ -25,7 +25,7 @@
         },
         "JELLYFIN_ADMIN_PASSWORD": {
           "defaultValue": "${{secret(24)}}",
-          "description": "Password for the 'admin' login in Jellyfin and at /upload, set on first boot only",
+          "description": "Password for the 'admin' login in Jellyfin (first boot only) and at /upload (every boot)",
           "isOptional": false
         }
       },
